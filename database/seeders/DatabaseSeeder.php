@@ -13,10 +13,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Call RBAC seeder to set up roles, permissions, and default users
+        $this->command->info('🌱 Starting MP-Software Database Seeding...');
+        
+        // Call production RBAC seeder to set up roles, permissions, and default users
         $this->call([
-            RBACSeeder::class,
+            ProductionRBACSeeder::class,
         ]);
+        
+        $this->command->info('🎉 Database seeding completed successfully!');
+        $this->command->warn('🔐 Remember to change default passwords in production environment!');
 
         // User::factory(10)->create();
 

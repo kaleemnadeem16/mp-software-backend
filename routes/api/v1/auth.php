@@ -14,18 +14,32 @@ use App\Http\Controllers\Api\V1\AuthController;
 */
 
 Route::prefix('auth')->group(function () {
-    // Public authentication routes
-    Route::post('register', [AuthController::class, 'register'])->name('auth.register');
-    Route::post('login', [AuthController::class, 'login'])->name('auth.login');
-    Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->name('auth.forgot-password');
-    Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('auth.reset-password');
+    // Public authentication routes with rate limiting
+    Route::post('register', [AuthController::class, 'register'])
+        ->middleware('throttle:auth:register')
+        ->name('auth.register');
+        
+    Route::post('login', [AuthController::class, 'login'])
+        ->middleware('throttle:auth:login')
+        ->name('auth.login');
+        
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword'])
+        ->middleware('throttle:auth:forgot-password')
+        ->name('auth.forgot-password');
+        
+    Route::post('reset-password', [AuthController::class, 'resetPassword'])
+        ->middleware('throttle:auth:forgot-password')
+        ->name('auth.reset-password');
 
-    // Protected authentication routes
-    Route::middleware('auth:sanctum')->group(function () {
+    // Protected authentication routes with general API rate limiting
+    Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
         Route::post('refresh', [AuthController::class, 'refresh'])->name('auth.refresh');
         Route::get('profile', [AuthController::class, 'profile'])->name('auth.profile');
         Route::put('profile', [AuthController::class, 'updateProfile'])->name('auth.update-profile');
-        Route::post('change-password', [AuthController::class, 'changePassword'])->name('auth.change-password');
+        
+        Route::post('change-password', [AuthController::class, 'changePassword'])
+            ->middleware('throttle:auth:change-password')
+            ->name('auth.change-password');
     });
 });

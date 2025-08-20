@@ -13,7 +13,7 @@ use App\Http\Controllers\Api\V1\RBACController;
 |
 */
 
-Route::middleware('auth:sanctum')->prefix('rbac')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('rbac')->group(function () {
     // Role Management
     Route::prefix('roles')->group(function () {
         Route::get('/', [RBACController::class, 'getRoles'])
@@ -21,7 +21,7 @@ Route::middleware('auth:sanctum')->prefix('rbac')->group(function () {
             ->name('rbac.roles.index');
         
         Route::post('/', [RBACController::class, 'createRole'])
-            ->middleware('check.permission:create roles')
+            ->middleware(['check.permission:create roles', 'throttle:rbac:sensitive'])
             ->name('rbac.roles.store');
         
         Route::get('/{role}', [RBACController::class, 'getRole'])
@@ -29,11 +29,11 @@ Route::middleware('auth:sanctum')->prefix('rbac')->group(function () {
             ->name('rbac.roles.show');
         
         Route::put('/{role}', [RBACController::class, 'updateRole'])
-            ->middleware('check.permission:edit roles')
+            ->middleware(['check.permission:edit roles', 'throttle:rbac:sensitive'])
             ->name('rbac.roles.update');
         
         Route::delete('/{role}', [RBACController::class, 'deleteRole'])
-            ->middleware('check.permission:delete roles')
+            ->middleware(['check.permission:delete roles', 'throttle:rbac:sensitive'])
             ->name('rbac.roles.destroy');
     });
 
@@ -44,7 +44,7 @@ Route::middleware('auth:sanctum')->prefix('rbac')->group(function () {
             ->name('rbac.permissions.index');
         
         Route::post('/', [RBACController::class, 'createPermission'])
-            ->middleware('check.permission:create permissions')
+            ->middleware(['check.permission:create permissions', 'throttle:rbac:sensitive'])
             ->name('rbac.permissions.store');
         
         Route::get('/{permission}', [RBACController::class, 'getPermission'])
@@ -52,11 +52,11 @@ Route::middleware('auth:sanctum')->prefix('rbac')->group(function () {
             ->name('rbac.permissions.show');
         
         Route::put('/{permission}', [RBACController::class, 'updatePermission'])
-            ->middleware('check.permission:edit permissions')
+            ->middleware(['check.permission:edit permissions', 'throttle:rbac:sensitive'])
             ->name('rbac.permissions.update');
         
         Route::delete('/{permission}', [RBACController::class, 'deletePermission'])
-            ->middleware('check.permission:delete permissions')
+            ->middleware(['check.permission:delete permissions', 'throttle:rbac:sensitive'])
             ->name('rbac.permissions.destroy');
     });
 
@@ -67,11 +67,11 @@ Route::middleware('auth:sanctum')->prefix('rbac')->group(function () {
             ->name('rbac.users.roles.index');
         
         Route::post('/{user}/roles', [RBACController::class, 'assignRoleToUser'])
-            ->middleware('check.permission:assign user roles')
+            ->middleware(['check.permission:assign user roles', 'throttle:rbac:sensitive'])
             ->name('rbac.users.roles.assign');
         
         Route::delete('/{user}/roles/{role}', [RBACController::class, 'removeRoleFromUser'])
-            ->middleware('check.permission:remove user roles')
+            ->middleware(['check.permission:remove user roles', 'throttle:rbac:sensitive'])
             ->name('rbac.users.roles.remove');
         
         Route::get('/{user}/permissions', [RBACController::class, 'getUserPermissions'])
@@ -79,11 +79,11 @@ Route::middleware('auth:sanctum')->prefix('rbac')->group(function () {
             ->name('rbac.users.permissions.index');
         
         Route::post('/{user}/permissions', [RBACController::class, 'assignPermissionToUser'])
-            ->middleware('check.permission:assign user permissions')
+            ->middleware(['check.permission:assign user permissions', 'throttle:rbac:sensitive'])
             ->name('rbac.users.permissions.assign');
         
         Route::delete('/{user}/permissions/{permission}', [RBACController::class, 'removePermissionFromUser'])
-            ->middleware('check.permission:remove user permissions')
+            ->middleware(['check.permission:remove user permissions', 'throttle:rbac:sensitive'])
             ->name('rbac.users.permissions.remove');
     });
 
@@ -94,15 +94,15 @@ Route::middleware('auth:sanctum')->prefix('rbac')->group(function () {
             ->name('rbac.roles.permissions.index');
         
         Route::post('/', [RBACController::class, 'assignPermissionToRole'])
-            ->middleware('check.permission:assign role permissions')
+            ->middleware(['check.permission:assign role permissions', 'throttle:rbac:sensitive'])
             ->name('rbac.roles.permissions.assign');
         
         Route::delete('/{permission}', [RBACController::class, 'removePermissionFromRole'])
-            ->middleware('check.permission:remove role permissions')
+            ->middleware(['check.permission:remove role permissions', 'throttle:rbac:sensitive'])
             ->name('rbac.roles.permissions.remove');
     });
 
-    // Current User Utility Routes
+    // Current User Utility Routes (no rate limit for performance)
     Route::get('user/current-permissions', [RBACController::class, 'getCurrentUserPermissions'])
         ->name('rbac.current-user-permissions');
     
